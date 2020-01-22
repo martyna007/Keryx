@@ -23,7 +23,6 @@ class ChatWrapper extends React.Component {
     }
 
     sendMessage = (selfMsg) => {
-        console.log(selfMsg);
         try {
             this.clientRef.sendMessage('/topic/public', JSON.stringify(selfMsg));
             return true;
@@ -31,7 +30,7 @@ class ChatWrapper extends React.Component {
             return false;
         }
     }
-
+    // old code
     // submitMessage = messageString => {
     //     const message = { name: this.state.name, message: messageString }
     //     this.client.publish({ destination: '/topic/public', body: messageString })
@@ -47,39 +46,45 @@ class ChatWrapper extends React.Component {
     render() {
         if (!this.state.logged) {
             return (
-                <form
-                    action="."
-                    required
-                    onSubmit={e => {
-                        e.preventDefault()
-                        this.submitName()
-                    }}>
-                    <input
-                        type="text"
-                        placeholder={'What is your name?'}
-                        value={this.state.username}
+                <div className="chatContainer">
+                    <form
+                        className="customForm"
+                        action="."
                         required
-                        autoFocus
-                        onChange={e => this.setState({ username: e.target.value })}
-                    />
-                    <input type="submit" value={'Login'} />
-                </form>
+                        onSubmit={e => {
+                            e.preventDefault()
+                            this.submitName()
+                        }}>
+                        <input
+                            className="customInput"
+                            type="text"
+                            placeholder={'What is your name?'}
+                            value={this.state.username}
+                            required
+                            autoFocus
+                            onChange={e => this.setState({ username: e.target.value })}
+                        />
+                        <input className="customButton" type="submit" value={'Login'} />
+                    </form>
+                </div>
             )
         } else {
-            console.log(this.state.messages);
             return (
-                <div>
+                <div className="chatContainer">
                     {/* <TalkBox topic="react-websocket-template" currentUserId={ this.randomUserId }
                     currentUser={ this.randomUserName } messages={ this.state.messages }
                     onSendMessage={ this.sendMessage } connected={ this.state.clientConnected }/> */}
-                    <h4>{this.state.username}</h4>
-                    {this.state.messages.map((message, index) =>
-                        <ChatMessage
-                            key={index}
-                            message={message}
-                            name={message}
-                        />
-                    )}
+                    <div className="chatBody">
+                        <h4>{this.state.username}</h4>
+                        {this.state.messages.map((message, index) =>
+                            <ChatMessage
+                                key={index}
+                                message={message}
+                                name={this.state.username}
+                            />
+                        )}
+                    </div>
+
                     <ChatInput
                         onSubmitMessage={messageString => this.sendMessage(messageString)}
                     />

@@ -12,6 +12,7 @@ class ChatInput extends Component {
   render() {
     return (
       <form
+        className="customForm"
         action="."
         required
         onSubmit={e => {
@@ -21,6 +22,7 @@ class ChatInput extends Component {
         }}
       >
         <input
+          className="customInput"
           type="text"
           placeholder={'Enter message...'}
           value={this.state.message}
@@ -28,7 +30,7 @@ class ChatInput extends Component {
           autoFocus
           onChange={e => this.setState({ message: e.target.value })}
         />
-        <input type="submit" value={'Send'} />
+        <input className="customButton" type="submit" value={'Send'} />
       </form>
     )
   }

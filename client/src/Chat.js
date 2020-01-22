@@ -53,9 +53,7 @@ class Chat extends React.Component {
   }
 
   componentDidMount() {
-    console.log(this.props);
     this.connectToServer()
-    console.log(this.state.connected);
   }
 
   componentWillUnmount() {
@@ -65,27 +63,22 @@ class Chat extends React.Component {
   shouldComponentUpdate(nextProps, nextState) {
     return false
   }
+  //delete or add new feature
+  // componentDidUpdate(nextProps) {
+  //   if (this.state.connected) {
+  //     // Subscribe to new topics
+  //     // difference(nextProps.topics, this.props.topics)
+  //     //   .forEach((newTopic) => {
+  //     //     this.subscribeTopic(newTopic)
+  //     //   })
 
-  componentDidUpdate(nextProps) {
-    console.log(nextProps);
-    if (this.state.connected) {
-      // Subscribe to new topics
-      // difference(nextProps.topics, this.props.topics)
-      //   .forEach((newTopic) => {
-      //     this.subscribeTopic(newTopic)
-      //   })
-
-      // // Unsubscribe from old topics
-      // difference(this.props.topics, nextProps.topics)
-      //   .forEach((oldTopic) => {
-      //     this.unsubscribeFromTopic(oldTopic)
-      //   })
-    }
-  }
-
-  render() {
-    return null
-  }
+  //     // // Unsubscribe from old topics
+  //     // difference(this.props.topics, nextProps.topics)
+  //     //   .forEach((oldTopic) => {
+  //     //     this.unsubscribeFromTopic(oldTopic)
+  //     //   })
+  //   }
+  // }
 
   initStompClient = () => {
     // Websocket held by stompjs can be opened only once
@@ -97,9 +90,6 @@ class Chat extends React.Component {
     });
 
     this.client.activate();
-    console.log(this.client);
-    console.log(this.props);
-
 
     this.client.heartbeatIncoming = this.props.heartbeat
     this.client.heartbeatOutgoing = this.props.heartbeat
@@ -118,13 +108,13 @@ class Chat extends React.Component {
   }
 
   subscribeTopic = (topic) => {
-    console.log(this.subscriptions);
-    console.log(!this.subscriptions.includes(topic));
     if (!this.subscriptions.includes(topic)) {
+      // eslint-disable-next-line
       let sub = this.client.subscribe(topic, (msg) => {
         this.props.onMessage(this.processMessage(msg.body), msg.headers.destination)
       }, this.props.subscribeHeaders)
-      console.log(topic, sub);
+      //todo adding new topic
+      //console.log(topic, sub);
       //this.subscriptions.set(topic, sub)
     }
   }
@@ -143,48 +133,39 @@ class Chat extends React.Component {
     this.subscriptions.delete(topic)
   }
   connectCallBack(frame) {
-    console.log(frame);
     this.setState({ connected: true })
   }
   errorCallback(error) {
-    console.log(error);
+    //todo error handling
   }
 
   connectToServer = () => {
     this.initStompClient()
     this.client.onConnect = (frame) => {
 
-      console.log('connected', frame);
       this.setState({ connected: true })
       this.props.topics.forEach((topic) => {
         this.subscribeTopic(topic)
       })
-      this.props.onConnect()
-
-      //  let idRandom = Math.random();
-      //  console.log(idRandom);
-      //  var subscription = this.client.subscribe('/topic/public', this.addMessage, { id: idRandom });
+      this.props.onConnect();
     };
 
     this.client.onStompError = (frame) => {
-      console.log(frame);
+      //error handling
       if (Object.keys(frame.body).includes('onConnectFailure')) {
         this.props.onConnectFailure(frame.headers['message'])
       } else {
-        console.log(frame)
+        //console.log(frame)
       }
-      console.log('Broker reported error: ' + frame.headers['message']);
-      console.log('Additional details: ' + frame.body);
     };
     if (this.state.connected) {
-          this.cleanUp()
-          // onDisconnect should be called only once per connect
-          this.props.onDisconnect()
-        }
-        if (this.props.autoReconnect && !this.state.explicitDisconnect) {
-          //retry?
-        }
-    console.log(this.state.connected);
+      this.cleanUp()
+      // onDisconnect should be called only once per connect
+      this.props.onDisconnect()
+    }
+    if (this.props.autoReconnect && !this.state.explicitDisconnect) {
+      //retry?
+    }
   }
 
   /**
@@ -230,10 +211,14 @@ class Chat extends React.Component {
    */
   sendMessage = (topic, msg, opt_headers = {}) => {
     if (this.state.connected) {
-      this.client.publish({destination: topic, headers: opt_headers,body: msg})
+      this.client.publish({ destination: topic, headers: opt_headers, body: msg })
     } else {
       throw new Error('Send error: Chat is disconnected')
     }
+  }
+  
+  render() {
+    return null
   }
 }
 
