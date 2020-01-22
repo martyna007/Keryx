@@ -23,6 +23,7 @@ class ChatWrapper extends React.Component {
     }
 
     sendMessage = (selfMsg) => {
+        console.log(selfMsg);
         try {
             this.clientRef.sendMessage('/topic/public', JSON.stringify(selfMsg));
             return true;
@@ -75,14 +76,14 @@ class ChatWrapper extends React.Component {
                     {this.state.messages.map((message, index) =>
                         <ChatMessage
                             key={index}
-                            message={message.message}
-                            name={message.name}
+                            message={message}
+                            name={message}
                         />
                     )}
                     <ChatInput
                         onSubmitMessage={messageString => this.sendMessage(messageString)}
                     />
-                    <Chat url={url} topics={['/topic/public']}
+                    <Chat url={url} topics={['/topic/public', '/topic/blah']}
                         onMessage={this.onMessageReceive} ref={(client) => { this.clientRef = client }}
                         onConnect={() => { this.setState({ clientConnected: true }) }}
                         onDisconnect={() => { this.setState({ clientConnected: false }) }} />

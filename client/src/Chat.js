@@ -6,12 +6,10 @@ class Chat extends React.Component {
   static defaultProps = {
     onConnect: () => { },
     onDisconnect: () => { },
-    getRetryInterval: (count) => { return 1000 * count },
     options: {},
     headers: {},
     subscribeHeaders: {},
     autoReconnect: true,
-    debug: false,
     heartbeat: 10000
   }
 
@@ -26,12 +24,6 @@ class Chat extends React.Component {
     topics: PropTypes.array.isRequired,
     onConnect: PropTypes.func,
     onDisconnect: PropTypes.func,
-    /**
-     * Gets called to find the time interval for next retry. Defaults to a function returing retryCount seconds.
-     *
-     * @param {number} retryCount number of retries for the current disconnect
-     */
-    getRetryInterval: PropTypes.func,
     /**
      * Callback when a message is recieved.
      *
@@ -58,141 +50,12 @@ class Chat extends React.Component {
     }
 
     this.subscriptions = [];
-    this.retryCount = 0
   }
 
-  //   componentDidMount() {
-  //     // this.client = new Client();
-
-  //     // this.client.configure({
-  //     //   brokerURL: 'ws://localhost:8443/chat',
-  //     //   onConnect: () => {
-  //     //     console.log('onConnect');
-
-  //     //     this.client.subscribe('/topic/public', message => {
-  //     //       console.log(message);
-  //     //     });
-
-  //     //     this.client.subscribe('/topic/greetings', message => {
-  //     //       alert(message);
-  //     //     });
-  //     //   },
-  //     //   // Helps during debugging, remove in production
-  //     //   debug: (str) => {
-  //     //     console.log(str);
-  //     //   }
-  //     // });
-
-  //     // this.client.activate();
-  //     console.log(this.props);
-  //   }
-
-  //   onMessage = (msg, topic) => {
-  //     this.setState(prevState => ({
-  //       messages: [...prevState.messages, msg]
-  //     }));
-  //   }
-
-  //   sendMessage = (msg, selfMsg) => {
-  //     try {
-  //       this.client.onSendMessage("/app/all", JSON.stringify(selfMsg));
-  //       return true;
-  //     } catch(e) {
-  //       return false;
-  //     }
-  //   }
-
-  //   submitName = nameString => {
-  //     this.setState({
-  //       logged: true
-  //     });
-
-
-  //     this.client.connectHeaders = { login: this.state.name, passcode: 'passcode' };
-
-  //     this.client.onConnect = function (frame) {
-  //       console.log('connected', frame);
-  //       // Do something, all subscribes must be done is this callback
-  //       // This is needed because this will be executed after a (re)connect
-  //       let idRandom = Math.random();
-  //       console.log(idRandom);
-  //       var subscription = this.client.subscribe('/topic/public', this.addMessage, { id: idRandom });
-  //       console.log(this.client);
-  //     };
-
-  //     this.client.onStompError = function (frame) {
-  //       // Will be invoked in case of error encountered at Broker
-  //       // Bad login/passcode typically will cause an error
-  //       // Complaint brokers will set `message` header with a brief message. Body may contain details.
-  //       // Compliant brokers will terminate the connection after any error
-  //       console.log('Broker reported error: ' + frame.headers['message']);
-  //       console.log('Additional details: ' + frame.body);
-  //     };
-
-  //     this.client.activate();
-
-  //     console.log(this.client);
-
-  //   }
-  //   addMessage = message => {
-  //     this.setState(prevState => ({
-  //       messages: [...prevState.messages, message]
-  //     }))
-  //     console.log(message);
-  //   }
-  //   submitMessage = messageString => {
-  //     const message = { name: this.state.name, message: messageString }
-  //     this.client.publish({ destination: '/topic/public', body: messageString })
-  //     this.addMessage(message)
-  //   }
-  //   exitChat = () => {
-  //     this.client.deactivate();
-  //   }
-
-  //   render() {
-  //     if (this.state.logged) {
-  //       return (
-  //         <div>
-  //           <h4>{this.state.name}</h4>
-  //           {this.state.messages.map((message, index) =>
-  //             <ChatMessage
-  //               key={index}
-  //               message={message.message}
-  //               name={message.name}
-  //             />
-  //           )}
-  //           <ChatInput
-  //             onSubmitMessage={messageString => this.submitMessage(messageString)}
-  //           />
-  //         </div>
-  //       )
-  //     } else {
-  //       return (
-  //         <form
-  //           action="."
-  //           required
-  //           onSubmit={e => {
-  //             e.preventDefault()
-  //             this.submitName()
-  //           }}
-  //         >
-  //           <input
-  //             type="text"
-  //             placeholder={'What is your name?'}
-  //             value={this.state.name}
-  //             required
-  //             autoFocus
-  //             onChange={e => this.setState({ name: e.target.value })}
-  //           />
-  //           <input type="submit" value={'Login'} />
-  //         </form>
-  //       )
-  //     }
-  //   }
-  // }
-
   componentDidMount() {
+    console.log(this.props);
     this.connectToServer()
+    console.log(this.state.connected);
   }
 
   componentWillUnmount() {
@@ -204,6 +67,7 @@ class Chat extends React.Component {
   }
 
   componentDidUpdate(nextProps) {
+    console.log(nextProps);
     if (this.state.connected) {
       // Subscribe to new topics
       // difference(nextProps.topics, this.props.topics)
@@ -227,17 +91,18 @@ class Chat extends React.Component {
     // Websocket held by stompjs can be opened only once
     //this.client = Stomp.over(new SockJS(this.props.url, null, this.props.options))
     this.client = new Client();
-    
-      this.client.configure({
-        brokerURL: this.props.url
-      });
 
-      this.client.activate();
-      console.log(this.client);
-      console.log(this.props);
+    this.client.configure({
+      brokerURL: this.props.url
+    });
 
-    this.client.heartbeatOutgoing = this.props.heartbeat
+    this.client.activate();
+    console.log(this.client);
+    console.log(this.props);
+
+
     this.client.heartbeatIncoming = this.props.heartbeat
+    this.client.heartbeatOutgoing = this.props.heartbeat
 
     if (Object.keys(this.props).includes('heartbeatIncoming')) {
       this.client.heartbeatIncoming = this.props.heartbeatIncoming
@@ -249,16 +114,18 @@ class Chat extends React.Component {
 
   cleanUp = () => {
     this.setState({ connected: false })
-    this.retryCount = 0
     this.subscriptions.clear()
   }
 
   subscribeTopic = (topic) => {
-    if (!this.subscriptions.has(topic)) {
+    console.log(this.subscriptions);
+    console.log(!this.subscriptions.includes(topic));
+    if (!this.subscriptions.includes(topic)) {
       let sub = this.client.subscribe(topic, (msg) => {
         this.props.onMessage(this.processMessage(msg.body), msg.headers.destination)
       }, this.props.subscribeHeaders)
-      this.subscriptions.set(topic, sub)
+      console.log(topic, sub);
+      //this.subscriptions.set(topic, sub)
     }
   }
 
@@ -275,32 +142,49 @@ class Chat extends React.Component {
     sub.unsubscribe()
     this.subscriptions.delete(topic)
   }
+  connectCallBack(frame) {
+    console.log(frame);
+    this.setState({ connected: true })
+  }
+  errorCallback(error) {
+    console.log(error);
+  }
 
   connectToServer = () => {
     this.initStompClient()
-    this.client.onConnect(this.props.headers, () => {
+    this.client.onConnect = (frame) => {
+
+      console.log('connected', frame);
       this.setState({ connected: true })
       this.props.topics.forEach((topic) => {
         this.subscribeTopic(topic)
       })
       this.props.onConnect()
-    }, (error) => {
-      if (error) {
-        if (Object.keys(this.props).includes('onConnectFailure')) {
-          this.props.onConnectFailure(error)
-        } else {
-          console.log(error.stack)
+
+      //  let idRandom = Math.random();
+      //  console.log(idRandom);
+      //  var subscription = this.client.subscribe('/topic/public', this.addMessage, { id: idRandom });
+    };
+
+    this.client.onStompError = (frame) => {
+      console.log(frame);
+      if (Object.keys(frame.body).includes('onConnectFailure')) {
+        this.props.onConnectFailure(frame.headers['message'])
+      } else {
+        console.log(frame)
+      }
+      console.log('Broker reported error: ' + frame.headers['message']);
+      console.log('Additional details: ' + frame.body);
+    };
+    if (this.state.connected) {
+          this.cleanUp()
+          // onDisconnect should be called only once per connect
+          this.props.onDisconnect()
         }
-      }
-      if (this.state.connected) {
-        this.cleanUp()
-        // onDisconnect should be called only once per connect
-        this.props.onDisconnect()
-      }
-      if (this.props.autoReconnect && !this.state.explicitDisconnect) {
-        this.timeoutId = setTimeout(this.connectToServer, this.props.getRetryInterval(this.retryCount++))
-      }
-    })
+        if (this.props.autoReconnect && !this.state.explicitDisconnect) {
+          //retry?
+        }
+    console.log(this.state.connected);
   }
 
   /**
@@ -324,17 +208,12 @@ class Chat extends React.Component {
    */
   disconnect = () => {
     // On calling disconnect explicitly no effort will be made to reconnect
-    // Clear timeoutId in case the component is trying to reconnect
-    if (this.timeoutId) {
-      clearTimeout(this.timeoutId)
-      this.timeoutId = null
-    }
     this.setState({ explicitDisconnect: true })
     if (this.state.connected) {
       this.subscriptions.forEach((subid, topic) => {
         this.unsubscribeFromTopic(topic)
       })
-      this.client.disconnect(() => {
+      this.client.deactivate(() => {
         this.cleanUp()
         this.props.onDisconnect()
       })
@@ -351,7 +230,7 @@ class Chat extends React.Component {
    */
   sendMessage = (topic, msg, opt_headers = {}) => {
     if (this.state.connected) {
-      this.client.publish(topic, opt_headers, msg)
+      this.client.publish({destination: topic, headers: opt_headers,body: msg})
     } else {
       throw new Error('Send error: Chat is disconnected')
     }
