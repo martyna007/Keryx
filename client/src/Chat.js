@@ -6,7 +6,6 @@ class Chat extends React.Component {
   static defaultProps = {
     onConnect: () => { },
     onDisconnect: () => { },
-    options: {},
     headers: {},
     subscribeHeaders: {},
     autoReconnect: true,
@@ -15,17 +14,11 @@ class Chat extends React.Component {
 
   static propTypes = {
     url: PropTypes.string.isRequired,
-    /**
-     * Additional options to pass to the underlying SockJS constructor.
-     *
-     * @see [SockJS-options](https://github.com/sockjs/sockjs-client#sockjs-client-api)
-     */
-    options: PropTypes.object,
     topics: PropTypes.array.isRequired,
     onConnect: PropTypes.func,
     onDisconnect: PropTypes.func,
     /**
-     * Callback when a message is recieved.
+     * Callback when a message is received.
      *
      * @param {(string|Object)} msg message received from server, if JSON format then object
      * @param {string} topic the topic on which the message was received
@@ -82,7 +75,6 @@ class Chat extends React.Component {
 
   initStompClient = () => {
     // Websocket held by stompjs can be opened only once
-    //this.client = Stomp.over(new SockJS(this.props.url, null, this.props.options))
     this.client = new Client();
 
     this.client.configure({
@@ -111,7 +103,7 @@ class Chat extends React.Component {
     if (!this.subscriptions.includes(topic)) {
       // eslint-disable-next-line
       let sub = this.client.subscribe(topic, (msg) => {
-        this.props.onMessage(this.processMessage(msg.body), msg.headers.destination)
+        this.props.onMessage(this.processMessage(msg.body), msg.headers)
       }, this.props.subscribeHeaders)
       //todo adding new topic
       //console.log(topic, sub);
@@ -168,13 +160,6 @@ class Chat extends React.Component {
     }
   }
 
-  /**
-   * Connect to the server if not connected. Under normal circumstances component
-   * will automatically try to connect to server. This method is mostly useful
-   * after component is explicitly disconnected via {@link SockJsClient#disconnect}.
-   *
-   * @public
-   */
   connect = () => {
     this.setState({ explicitDisconnect: false })
     if (!this.state.connected) {
@@ -182,11 +167,6 @@ class Chat extends React.Component {
     }
   }
 
-  /**
-   * Disconnect STOMP client and disable all reconnect.
-   *
-   * @public
-   */
   disconnect = () => {
     // On calling disconnect explicitly no effort will be made to reconnect
     this.setState({ explicitDisconnect: true })
@@ -201,14 +181,6 @@ class Chat extends React.Component {
     }
   }
 
-  /**
-   * Send message to the specified topic.
-   *
-   * @param {string} topic target topic to send message
-   * @param {string} msg message to send
-   * @param {Object} [opt_headers={}] additional headers for underlying STOMP client
-   * @public
-   */
   sendMessage = (topic, msg, opt_headers = {}) => {
     if (this.state.connected) {
       this.client.publish({ destination: topic, headers: opt_headers, body: msg })

@@ -16,15 +16,20 @@ class ChatWrapper extends React.Component {
         };
     }
 
-    onMessageReceive = (msg, topic) => {
+    onMessageReceive = (msg, headers) => {
+        let msgObj = {
+            username: headers.user,
+            message: msg,
+            time: new Date().toLocaleString()
+        }
         this.setState(prevState => ({
-            messages: [...prevState.messages, msg]
+            messages: [...prevState.messages, msgObj]
         }));
     }
 
     sendMessage = (selfMsg) => {
         try {
-            this.clientRef.sendMessage('/topic/public', JSON.stringify(selfMsg));
+            this.clientRef.sendMessage('/topic/public', JSON.stringify(selfMsg), { user: this.state.username });
             return true;
         } catch (e) {
             return false;
@@ -47,6 +52,7 @@ class ChatWrapper extends React.Component {
         if (!this.state.logged) {
             return (
                 <div className="chatContainer">
+                <div className="chatBody"></div>
                     <form
                         className="customForm"
                         action="."
@@ -71,16 +77,15 @@ class ChatWrapper extends React.Component {
         } else {
             return (
                 <div className="chatContainer">
-                    {/* <TalkBox topic="react-websocket-template" currentUserId={ this.randomUserId }
-                    currentUser={ this.randomUserName } messages={ this.state.messages }
-                    onSendMessage={ this.sendMessage } connected={ this.state.clientConnected }/> */}
                     <div className="chatBody">
-                        <h4>{this.state.username}</h4>
-                        {this.state.messages.map((message, index) =>
+                        {/* <h4>{this.state.username}</h4> */}
+                        {this.state.messages.map((msg, index) =>
                             <ChatMessage
                                 key={index}
-                                message={message}
-                                name={this.state.username}
+                                message={msg.message}
+                                name={msg.username}
+                                time={msg.time}
+                                owner={msg.username === this.state.username ? true : false}
                             />
                         )}
                     </div>
