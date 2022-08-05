@@ -1,0 +1,98 @@
+.App {
+  text-align: center;
+}
+.App-header {
+  background-color: #222;
+  height: 170px;
+  padding: 0;
+  color: white;
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position: center;
+}
+.App-header img {
+  height: 100%;
+}
+.customButton {
+  padding: 10px 20px;
+  background-color: #fff;
+  color: #cbcbcb;
+  outline: none;
+  border: none;
+  border-radius: 4px;
+  text-transform: capitalize;
+  cursor: pointer;
+  border: 2px solid #a9a9a9;
+  border-left-width: 0;
+  border-bottom-left-radius: 0;
+  border-top-left-radius: 0;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  transition: all .2s ease-out;
+  -webkit-transition: all .2s ease-out;
+  -moz-transition: all .2s ease-out;
+  -ms-transition: all .2s ease-out;
+  -o-transition: all .2s ease-out;
+  width: 87px;
+}
+.customInput {
+  padding: 10px;
+  border: 2px solid #222;
+  border-radius: 4px;
+  border-right-width: 0;
+  border-bottom-right-radius: 0;
+  border-top-right-radius: 0;
+  width: 251px;
+}
+.customInput:focus {
+  outline: none;
+}
+.customButton:hover, .customButton:active {
+  background-color: #222;
+  color: #fff;
+  border-color: #222;
+}
+.messageContainer {
+  margin: 2px;
+  text-align: end;
+  border-radius: 4px;
+  display: flex;
+  flex-direction: row-reverse;
+}
+.messageContainer .name {
+  font-size: 1em;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 10px;
+}
+.messageContainer .time {
+  font-size: 0.6em;
+}
+.messageContainer p {
+  margin: 0;
+  padding: 0px 0 4px;
+  font-size: 1.2em;
+}
+.messageContainer.leftSide {
+  flex-direction: row;
+  text-align: start;
+  background-color: #f9f9f9;
+}
+.chatContainer {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 360px;
+}
+.chatBody {
+  margin: 20px 0;
+}
+.chatBody h4 {
+  background-color: #ececec;
+  margin: 0;
+  padding: 4px;
+  margin-bottom: 15px;
+}
